@@ -1,0 +1,20 @@
+extends layout
+
+block content
+  include partials/nav
+
+  main.create-post
+    h1 Create Post
+    a(href="https://globalupload.io" target="_blank") IPFS Asset Manager
+    form(action="/post/create-post/" method="post")
+      label Title
+      input(type="text" name="title")
+      label IPFS Asset Hash
+      input(type="text" name="meta")
+      label Research Body Markdown supported
+      textarea(name="post")
+      label Tags
+      input(type="text" name="tags")
+      button.btn.btn-primary(type="submit") Submit
+      p Posting as #{name}
+      p #{msg}
