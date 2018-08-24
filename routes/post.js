@@ -12,22 +12,63 @@ router.get('/', util.isAuthenticated, (req, res, next) => {
 });
 
 /* POST a create post broadcast to STEEM network. */
+router.post('/create-postbody', util.isAuthenticated, (req, res) => {
+    let author = req.session.steemconnect.name
+    let permlink = util.urlString()
+    var tags = req.body.tags.split(',').map(item => item.trim());
+    let primaryTag = 'eureka'
+    let otherTags = tags.slice(0)
+    let title = req.body.title
+    let file = req.body.file
+    let filesize = req.body.filesize
+    let filetype = req.body.filetype
+    let filename = req.body.filename
+    if(filetype.length > 3) {
+    string = string.substring(0,2)
+    }
+    let linker = '[This ' + filetype + ' may be viewed at Eureka](https://?.app/eureka/' + author + '/' + permlink + ')';
+    let customData = {
+      tags: otherTags,
+      app: 'eureka.app/v0.1.0',
+      eurekaType: 'body',
+      eurekaFile: filetype,
+      eurekaSize: filesize,
+      eurekaName: filename,
+      eurekaHeader: linker.length
+    }
+    let body = linker + file;
+    steem.comment('', primaryTag, author, permlink, title, body, customData, (err, steemResponse) => {
+        if (err) {
+          res.render('post', {
+            name: req.session.steemconnect.name,
+            msg: 'Error - ${err}'
+          })
+        } else {
+          res.render('post', {
+            name: req.session.steemconnect.name,
+            msg: 'Posted To Steem Network'
+          })
+        }
+    });
+});
+
 router.post('/create-post', util.isAuthenticated, (req, res) => {
     let author = req.session.steemconnect.name
     let permlink = util.urlString()
     var tags = req.body.tags.split(',').map(item => item.trim());
-    let primaryTag = tags[0] || 'eureka'
-    let otherTags = tags.slice(1)
+    let primaryTag = 'eureka'
+    let otherTags = tags.slice(0)
     let title = req.body.title
     let body = req.body.post
     let meta = req.body.meta
     if (meta.split('/')[3] == 'ipfs') {
-    hashy = hashy.split('/')[4];
+    meta = meta.split('/')[4];
     }
     let customData = {
       tags: otherTags,
       app: 'eureka.app/v0.1.0',
-      eurekaMeta: meta
+      eurekaIPFS: meta,
+      eurekaType: 'IPFS'
     }
     steem.comment('', primaryTag, author, permlink, title, body, customData, (err, steemResponse) => {
         if (err) {

@@ -6,7 +6,7 @@ let cookieParser = require('cookie-parser');
 let bodyParser = require('body-parser');
 let session = require('express-session');
 let expressSanitized = require('express-sanitize-escape');
-
+let request = require('request');
 let index = require('./routes/index');
 let auth = require('./routes/auth');
 let feed = require('./routes/feed');
@@ -47,6 +47,7 @@ app.use('/logout', auth);
 app.use('/feed', feed);
 app.use('/post', post);
 app.use('/post/create-post', post);
+app.use('/post/create-postbody', post);
 
 
 // catch 404 and forward to error handler

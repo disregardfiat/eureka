@@ -33,7 +33,7 @@ function getTrending(query, initial){
     if (err === null) {
       var filteredResults = []
       for (i = 0; i < result.length; i++) {
-        let eureka = JSON.parse(result[i].json_metadata).eurekaMeta
+        let eureka = JSON.parse(result[i].json_metadata).eurekaType
         if (eureka) {
           filteredResults.push(result[i])
           }
@@ -215,16 +215,20 @@ function getPostAndComments(url) {
     let users = result.accounts;
     let resultsArray = [];
     for ( post in result.content ){
-
       var html = result.content[post].body
+      var headerLength = JSON.parse(result.content[post].json_metadata).eurekaHeader
+      if (JSON.parse(result.content[post].json_metadata).eurekaType == 'body') {
+      html = html.substring(headerLength, html.length - headerLength)
+      }
+      html = result.content[post].body + `
+        ***
+        ` + '[Asset File](https://ipfs.io/ipfs' + JSON.parse(result.content[post].json_metadata).eurekaMeta + ')'
 
       resultsArray.push({
         id: result.content[post].id,
         title: result.content[post].root_title,
         author: result.content[post].author,
-        body: html + `
-        ***
-        ` + '[Asset File](https://ipfs.io/ipfs' + JSON.parse(result.content[post].json_metadata).eurekaMeta + ')',
+        body: html,
         json: result.content[post].json_metadata,
         meta: JSON.parse(result.content[post].json_metadata).eurekaMeta,
         permlink: result.content[post].permlink,
@@ -581,3 +585,42 @@ $('.load-more-posts').on('click', (e) => {
   let tag = $('main').data('tag') || ''
   getMoreContent(filter, tag)
 })
+
+function checkSize() {
+    var input, file;
+
+    // (Can't use `typeof FileReader === "function"` because apparently
+    // it comes back as "object" on some browsers. So just see if it's there
+    // at all.)
+    if (!window.FileReader) {
+        bodyAppend("p", "The file API isn't supported on this browser yet.");
+        return;
+    }
+
+    input = document.getElementById('fileinput');
+    if (!input) {
+        bodyAppend("p", "Um, couldn't find the fileinput element.");
+    }
+    else if (!input.files) {
+        bodyAppend("p", "This browser doesn't seem to support the `files` property of file inputs.");
+    }
+    else if (!input.files[0]) {
+        bodyAppend("p", "Please select a file before clicking 'Load'");
+    }
+    else {
+        file = input.files[0];
+        if (file.size >= 63900) {
+        bodyAppend("p", "File " + file.name + " is " + file.size + " bytes in size. Maximum Blockchain storage is 63,900 bytes");
+        } else {
+          // enable post function
+        }
+    }
+}
+
+function bodyAppend(tagName, innerHTML) {
+    var elm;
+
+    elm = document.createElement(tagName);
+    elm.innerHTML = innerHTML;
+    document.body.appendChild(elm);
+}
